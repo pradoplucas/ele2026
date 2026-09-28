@@ -404,17 +404,18 @@
                 class="bg-slate-900 border border-slate-800 rounded-xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl"
             >
                 <div class="p-5 border-b border-slate-800 flex justify-between items-center">
-                    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-4 text-center sm:text-left space-x-4">
+                   <div class="flex sm:flex-row items-center sm:text-left text-center space-x-4">
                         <img
                             id="info-foto"
                             src=""
                             alt="Foto Candidato"
-                            class="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-slate-700 shadow"
+                            class="w-20 h-25 rounded object-cover border-2 border-slate-700 shadow"
                             onerror="this.src='fotos/error.jpg'"
                         />
                         <div>
-                            <h2 id="info-nome-civil" class="text-lg font-bold text-sky-400"></h2>
-                            <p id="info-nome-urna" class="text-sm text-slate-300"></p>
+                            <p id="info-nome-urna" class="text-xl font-bold text-sky-400"></p>
+                            <h2 id="info-nome-civil" class="text-sm text-slate-300"></h2>
+                            <p id="info-numero" class="text-sm text-slate-300"></p>
                         </div>
                     </div>
                     <button
@@ -704,8 +705,9 @@
                 $("#info-foto").attr("src", obterCaminhoFoto(c));
                 $("#info-nome-civil").text(c.NM_CANDIDATO || "Nome não informado");
                 $("#info-nome-urna").text(
-                    `Nome de Urna: "${c.NM_URNA_CANDIDATO || "-"}" | Nº ${c.NR_CANDIDATO || "-"}`
+                    `${c.NM_URNA_CANDIDATO || "-"}`
                 );
+                $("#info-numero").text(`Nº ${c.NR_CANDIDATO || "-"}`);
 
                 // Render Bloco Eleitoral
                 $("#grid-eleitoral").html(`
