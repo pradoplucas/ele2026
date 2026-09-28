@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dashboard Eleições 2026 - Paraná (PR)</title>
+
+        <!-- CSS Tailwind via CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
+        <style>
+            body {
+                background-color: #0f172a;
+                color: #f8fafc;
+                font-family:
+                    ui-sans-serif,
+                    system-ui,
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+            }
+
+            /* Customização do DataTables para Dark Mode */
+            .dataTables_wrapper .dataTables_length,
+            .dataTables_wrapper .dataTables_filter,
+            .dataTables_wrapper .dataTables_info,
+            .dataTables_wrapper .dataTables_paginate {
+                color: #94a3b8 !important;
+                margin-bottom: 1rem;
+                margin-top: 1rem;
+            }
+            .dataTables_wrapper .dataTables_filter input,
+            .dataTables_wrapper .dataTables_length select {
+                background-color: #1e293b;
+                border: 1px solid #334155;
+                color: #f8fafc;
+                border-radius: 0.375rem;
+                padding: 0.375rem 0.75rem;
+            }
+            table.dataTable {
+                border-collapse: collapse !important;
+                width: 100% !important;
+                border-color: #334155 !important;
+            }
+            table.dataTable thead th {
+                background-color: #1e293b !important;
+                color: #38bdf8 !important;
+                border-bottom: 2px solid #334155 !important;
+                padding: 12px 10px !important;
+                white-space: nowrap;
+            }
+            table.dataTable tbody tr {
+                background-color: #0f172a !important;
+                border-bottom: 1px solid #1e293b !important;
+            }
+            table.dataTable tbody tr:hover {
+                background-color: #1e293b !important;
+            }
+            table.dataTable tbody td {
+                padding: 10px !important;
+                color: #e2e8f0;
+                white-space: nowrap;
+                vertical-align: middle;
+            }
+            .dataTables_paginate .paginate_button {
+                color: #94a3b8 !important;
+                border-radius: 0.375rem !important;
+            }
+            .dataTables_paginate .paginate_button.current {
+                background: #0284c7 !important;
+                color: #ffffff !important;
+                border: none !important;
+            }
+        </style>
+    </head>
+    <body class="p-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Cabeçalho -->
+            <header class="mb-6 border-b border-slate-800 pb-5">
+                <h1 class="text-3xl font-bold text-sky-400">Candidatos Paraná (PR) - Eleições 2026</h1>
+                <p class="text-slate-400 mt-1">
+                    Painel consolidado com seleção de colunas, busca por filtros e consulta de patrimônio.
+                </p>
+            </header>
+
+            <!-- Painel de Seleção de Colunas -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-6 shadow-lg">
+                <div class="flex justify-between items-center">
+                    <button
+                        onclick="togglePainelColunas()"
+                        class="flex items-center space-x-2 text-sm font-semibold text-slate-300 hover:text-sky-400 transition-colors focus:outline-none"
+                    >
+                        <svg
+                            id="icone-painel"
+                            class="w-4 h-4 transition-transform duration-200 rotate-180"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 9l-7 7-7-7"
+                            ></path>
+                        </svg>
+                        <span>Personalizar Colunas da Tabela</span>
+                    </button>
+
+                    <div id="acoes-colunas" class="hidden space-x-2">
+                        <button onclick="marcarTodasColunas(true)" class="text-xs text-sky-400 hover:underline">
+                            Marcar Todas
+                        </button>
+                        <span class="text-slate-600">|</span>
+                        <button onclick="marcarTodasColunas(false)" class="text-xs text-sky-400 hover:underline">
+                            Desmarcar Todas
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    id="painel-checkboxes"
+                    class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-xs text-slate-300 hidden mt-3"
+                >
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="0"
+                            checked
+                        />
+                        <span>Número (NR_CANDIDATO)</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="1"
+                            checked
+                        />
+                        <span>Nome de Urna</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="2"
+                            checked
+                        />
+                        <span>Cargo Disputado</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="3"
+                            checked
+                        />
+                        <span>Partido</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="4"
+                        />
+                        <span>Data de Nascimento</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="5"
+                        />
+                        <span>Naturalidade (Município/UF)</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="6"
+                        />
+                        <span>Gênero</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="7"
+                        />
+                        <span>Cor / Raça</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="8"
+                        />
+                        <span>Escolaridade</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="9"
+                        />
+                        <span>Ocupação</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="10"
+                        />
+                        <span>Quilombola</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="11"
+                        />
+                        <span>Etnia Indígena</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="12"
+                        />
+                        <span>Situação Julgamento</span>
+                    </label>
+                    <label
+                        class="flex items-center space-x-2 cursor-pointer bg-slate-800/50 p-2 rounded border border-slate-800 hover:border-slate-700"
+                    >
+                        <input
+                            type="checkbox"
+                            class="col-toggle rounded bg-slate-900 border-slate-700 text-sky-500"
+                            data-column="13"
+                            checked
+                        />
+                        <span>Total de Bens (R$)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Tabela Principal -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table id="tabela-candidatos" class="stripe hover display text-sm">
+                        <thead>
+                            <tr>
+                                <th>Nº</th>
+                                <th>Nome de Urna</th>
+                                <th>Cargo</th>
+                                <th>Partido</th>
+                                <th>Nascimento</th>
+                                <th>Naturalidade</th>
+                                <th>Gênero</th>
+                                <th>Cor/Raça</th>
+                                <th>Escolaridade</th>
+                                <th>Ocupação</th>
+                                <th>Quilombola</th>
+                                <th>Etnia Indígena</th>
+                                <th>Situação Julgamento</th>
+                                <th>Total Bens (R$)</th>
+                                <th>Ações</th>
+                            </tr>
+                            <tr id="linha-filtros">
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th>
+                                    <input
+                                        type="text"
+                                        placeholder="Filtrar"
+                                        class="w-full text-xs p-1 bg-slate-800 border border-slate-700 text-white rounded"
+                                    />
+                                </th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal 1: Todas as Informações do Candidato -->
+        <div id="modal-info-completa" class="fixed inset-0 bg-black/75 hidden items-center justify-center p-4 z-50">
+            <div
+                class="bg-slate-900 border border-slate-800 rounded-xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl"
+            >
+                <div class="p-5 border-b border-slate-800 flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <img
+                            id="info-foto"
+                            src=""
+                            alt="Foto Candidato"
+                            class="w-16 h-20 object-cover rounded border border-slate-700 shadow"
+                            onerror="this.src='fotos/error.jpg'"
+                        />
+                        <div>
+                            <h2 id="info-nome-civil" class="text-xl font-bold text-sky-400"></h2>
+                            <p id="info-nome-urna" class="text-sm text-slate-300"></p>
+                        </div>
+                    </div>
+                    <button
+                        onclick="fecharModal('modal-info-completa')"
+                        class="text-slate-400 hover:text-white text-2xl font-bold"
+                    >
+                        &times;
+                    </button>
+                </div>
+
+                <div class="p-6 overflow-y-auto space-y-6 text-sm">
+                    <!-- Bloco Eleitoral -->
+                    <div>
+                        <h3
+                            class="text-xs uppercase font-bold text-sky-400 tracking-wider mb-2 border-b border-slate-800 pb-1"
+                        >
+                            Dados da Candidatura
+                        </h3>
+                        <div
+                            id="grid-eleitoral"
+                            class="grid grid-cols-2 md:grid-cols-3 gap-3 bg-slate-800/40 p-3 rounded border border-slate-800"
+                        ></div>
+                    </div>
+
+                    <!-- Bloco Pessoal -->
+                    <div>
+                        <h3
+                            class="text-xs uppercase font-bold text-sky-400 tracking-wider mb-2 border-b border-slate-800 pb-1"
+                        >
+                            Dados Pessoais
+                        </h3>
+                        <div
+                            id="grid-pessoal"
+                            class="grid grid-cols-2 md:grid-cols-3 gap-3 bg-slate-800/40 p-3 rounded border border-slate-800"
+                        ></div>
+                    </div>
+
+                    <!-- Bloco Julgamento -->
+                    <div>
+                        <h3
+                            class="text-xs uppercase font-bold text-sky-400 tracking-wider mb-2 border-b border-slate-800 pb-1"
+                        >
+                            Situação Jurídica
+                        </h3>
+                        <div
+                            id="grid-julgamento"
+                            class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-800/40 p-3 rounded border border-slate-800"
+                        ></div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-t border-slate-800 text-right">
+                    <button
+                        onclick="fecharModal('modal-info-completa')"
+                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm"
+                    >
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal 2: Apenas Bens Declarados -->
+        <div id="modal-bens" class="fixed inset-0 bg-black/75 hidden items-center justify-center p-4 z-50">
+            <div
+                class="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl"
+            >
+                <div class="p-5 border-b border-slate-800 flex justify-between items-center">
+                    <div>
+                        <h2 id="bens-modal-nome" class="text-xl font-bold text-sky-400"></h2>
+                        <p id="bens-modal-total" class="text-sm font-semibold text-emerald-400 mt-1"></p>
+                    </div>
+                    <button
+                        onclick="fecharModal('modal-bens')"
+                        class="text-slate-400 hover:text-white text-2xl font-bold"
+                    >
+                        &times;
+                    </button>
+                </div>
+
+                <div class="p-6 overflow-y-auto">
+                    <div id="bens-modal-lista" class="space-y-2"></div>
+                </div>
+
+                <div class="p-4 border-t border-slate-800 text-right">
+                    <button
+                        onclick="fecharModal('modal-bens')"
+                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm"
+                    >
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+        <script>
+            let tabelaData = null;
+
+            // Função auxiliar para construir o caminho da foto segundo padrão TSE
+            function obterCaminhoFoto(row) {
+                const uf = row.SG_UF || "PR";
+                const sq = row.SQ_CANDIDATO || "";
+                return `fotos/F${uf}${sq}_div.jpg`;
+            }
+
+			$(document).ready(function () {
+				fetch("./candidatos_2026_PR_consolidado.json")
+					.then((res) => {
+						if (!res.ok) {
+							throw new Error(`Erro na requisição HTTP: status ${res.status}`);
+						}
+						return res.json();
+					})
+					.then((data) => inicializarTabela(data))
+					.catch((err) => {
+						alert("Erro ao carregar o arquivo de dados JSON. Verifique se o arquivo está presente na raiz do repositório no GitHub.");
+						console.error(err);
+					});
+			});
+
+            function inicializarTabela(data) {
+                // 1. Vincula o índice do filtro no HTML via atributo data-col-index
+                $("#linha-filtros th").each(function (index) {
+                    $(this).attr("data-col-index", index);
+                });
+                tabelaData = $("#tabela-candidatos").DataTable({
+                    data: data,
+                    language: {
+                        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json",
+                    },
+                    columns: [
+                        // 0: NR_CANDIDATO
+                        { data: "NR_CANDIDATO", defaultContent: "-" },
+
+                        // 1: NM_URNA_CANDIDATO (Clicável para modal completo)
+                        {
+                            data: "NM_URNA_CANDIDATO",
+                            render: function (data, type, row, meta) {
+                                const nome = data || row.NM_CANDIDATO || "Sem nome";
+                                return `<button onclick="abrirModalInfo(${meta.row})" class="text-sky-400 hover:underline font-semibold text-left">${nome}</button>`;
+                            },
+                        },
+
+                        // 2: DS_CARGO
+                        {
+                            data: "DS_CARGO",
+                            render: (d, t, r) => d || "-",
+                        },
+
+                        // 3: SG_PARTIDO (NR_PARTIDO) com tooltip do NM_PARTIDO
+                        {
+                            data: "SG_PARTIDO",
+                            render: function (d, t, r) {
+                                const num = r.NR_PARTIDO ? `(${r.NR_PARTIDO})` : "";
+                                const nomeCompleto = r.NM_PARTIDO || d || "";
+                                return `<span title="${nomeCompleto}" class="cursor-help underline decoration-dotted">${d || "-"} ${num}</span>`;
+                            },
+                        },
+
+                        // 4: DT_NASCIMENTO
+                        { data: "DT_NASCIMENTO", defaultContent: "-" },
+
+                        // 5: Naturalidade (UF e Município)
+                        {
+                            data: "NM_MUNICIPIO_NASCIMENTO",
+                            render: (d, t, r) => {
+                                const uf = r.SG_UF_NASCIMENTO || "";
+                                const mun = d || "";
+                                return mun || uf ? `${mun} / ${uf}` : "-";
+                            },
+                        },
+
+                        // 6: DS_GENERO
+                        {
+                            data: "DS_GENERO",
+                            render: (d, t, r) => d || "-",
+                        },
+
+                        // 7: DS_COR_RACA
+                        {
+                            data: "DS_COR_RACA",
+                            render: (d, t, r) => d || "-",
+                        },
+
+                        // 8: DS_GRAU_INSTRUCAO
+                        {
+                            data: "DS_GRAU_INSTRUCAO",
+                            render: (d, t, r) => d || "-",
+                        },
+
+                        // 9: DS_OCUPACAO
+                        {
+                            data: "DS_OCUPACAO",
+                            render: (d, t, r) => d || "-",
+                        },
+
+                        // 10: ST_QUILOMBOLA
+                        { data: "ST_QUILOMBOLA", defaultContent: "-" },
+
+                        // 11: DS_ETNIA_INDIGENA
+                        {
+                            data: "DS_ETNIA_INDIGENA",
+                            render: (d, t, r) => d || "Não informado",
+                        },
+
+                        // 12: DS_SITUACAO_JULGAMENTO
+                        {
+                            data: "DS_SITUACAO_JULGAMENTO",
+                            render: (d, t, r) => d || "-",
+                        },
+
+                        // 13: valor_total_bens
+                        {
+                            data: "valor_total_bens",
+                            render: (d) =>
+                                parseFloat(d || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+                        },
+
+                        // 14: Ações (Ver Bens)
+                        {
+                            data: null,
+                            orderable: false,
+                            render: (d, t, r, meta) =>
+                                `<button onclick="abrirModalBens(${meta.row})" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs">Ver Bens</button>`,
+                        },
+                    ],
+                    order: [[13, "desc"]],
+                    pageLength: 50,
+                    orderCellsTop: true,
+                });
+
+                // 2. Filtro usando o atributo absoluto de coluna
+                $("#linha-filtros input").on("keyup change clear", function () {
+                    const colIdx = parseInt($(this).closest("th").attr("data-col-index"));
+                    tabelaData.column(colIdx).search(this.value).draw();
+                });
+
+                // 3. Oculta ou exibe o input de filtro junto com a coluna
+                $(".col-toggle").on("change", function () {
+                    const colIdx = parseInt($(this).attr("data-column"));
+                    const isChecked = this.checked;
+
+                    // Alterna a coluna de dados no DataTables
+                    tabelaData.column(colIdx).visible(isChecked);
+
+                    // Alterna a célula do filtro na linha de cabeçalho
+                    $(`#linha-filtros th[data-col-index="${colIdx}"]`).toggle(isChecked);
+                });
+
+                // Aplica o estado inicial das colunas e dos filtros
+                $(".col-toggle").each(function () {
+                    const colIdx = parseInt($(this).attr("data-column"));
+                    const isChecked = this.checked;
+
+                    tabelaData.column(colIdx).visible(isChecked);
+                    $(`#linha-filtros th[data-col-index="${colIdx}"]`).toggle(isChecked);
+                });
+
+                // Controle dos Checkboxes de visibilidade
+                $(".col-toggle").on("change", function () {
+                    const colIdx = parseInt($(this).attr("data-column"));
+                    tabelaData.column(colIdx).visible(this.checked);
+                });
+
+                // Aplica visibilidade inicial baseada nos checkboxes
+                $(".col-toggle").each(function () {
+                    const colIdx = parseInt($(this).attr("data-column"));
+                    tabelaData.column(colIdx).visible(this.checked);
+                });
+            }
+
+            function marcarTodasColunas(status) {
+                $(".col-toggle").prop("checked", status).trigger("change");
+            }
+
+            // Modal com TODAS as informações consolidadas do candidato
+            function abrirModalInfo(index) {
+                const c = tabelaData.row(index).data();
+
+                $("#info-foto").attr("src", obterCaminhoFoto(c));
+                $("#info-nome-civil").text(c.NM_CANDIDATO || "Nome não informado");
+                $("#info-nome-urna").text(
+                    `Nome de Urna: "${c.NM_URNA_CANDIDATO || "-"}" | Nº ${c.NR_CANDIDATO || "-"}`
+                );
+
+                // Render Bloco Eleitoral
+                $("#grid-eleitoral").html(`
+        <div><span class="text-slate-400 block text-xs">Cargo:</span> ${c.DS_CARGO || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Partido:</span> ${c.SG_PARTIDO || "-"} (${c.NR_PARTIDO || "-"})</div>
+        <div><span class="text-slate-400 block text-xs">Nome do Partido:</span> ${c.NM_PARTIDO || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">UF / Município:</span> ${c.SG_UF || "-"} / ${c.NM_UE || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Eleição:</span> ${c.DS_ELEICAO || "-"} (${c.ANO_ELEICAO || "-"})</div>
+        <div><span class="text-slate-400 block text-xs">SQ Candidato:</span> ${c.SQ_CANDIDATO || "-"}</div>
+      `);
+
+                // Render Bloco Pessoal
+                $("#grid-pessoal").html(`
+        <div><span class="text-slate-400 block text-xs">CPF:</span> ${c.NR_CPF_CANDIDATO || "Não divulgável"}</div>
+        <div><span class="text-slate-400 block text-xs">Data Nasc.:</span> ${c.DT_NASCIMENTO || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Naturalidade:</span> ${c.NM_MUNICIPIO_NASCIMENTO || "-"} / ${c.SG_UF_NASCIMENTO || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Gênero:</span> ${c.DS_GENERO || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Cor / Raça:</span> ${c.DS_COR_RACA || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Escolaridade:</span> ${c.DS_GRAU_INSTRUCAO || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Ocupação:</span> ${c.DS_OCUPACAO || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Estado Civil:</span> ${c.DS_ESTADO_CIVIL || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Quilombola:</span> ${c.ST_QUILOMBOLA || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Etnia Indígena:</span> ${c.DS_ETNIA_INDIGENA || "-"}</div>
+      `);
+
+                // Render Bloco Julgamento
+                $("#grid-julgamento").html(`
+        <div><span class="text-slate-400 block text-xs">Situação Julgamento:</span> ${c.DS_SITUACAO_JULGAMENTO || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Situação Candidatura:</span> ${c.DS_SITUACAO_CANDIDATURA || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Julgamento Pleito:</span> ${c.DS_SITUACAO_JULGAMENTO_PLEITO || "-"}</div>
+        <div><span class="text-slate-400 block text-xs">Julgamento Urna:</span> ${c.DS_SITUACAO_JULGAMENTO_URNA || "-"}</div>
+      `);
+
+                $("#modal-info-completa").removeClass("hidden").addClass("flex");
+            }
+
+            // Modal de Bens
+            function abrirModalBens(index) {
+                const c = tabelaData.row(index).data();
+                const total = parseFloat(c.valor_total_bens || 0).toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                });
+
+                $("#bens-modal-nome").text(c.NM_CANDIDATO || c.NM_URNA_CANDIDATO);
+                $("#bens-modal-total").text(`Total Declarado: ${total}`);
+
+                const container = $("#bens-modal-lista").empty();
+
+                if (c.bens && c.bens.length > 0) {
+                    c.bens.forEach((bem) => {
+                        const val = parseFloat(bem.valor || 0).toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                        });
+                        container.append(`
+            <div class="p-3 bg-slate-800 rounded border border-slate-700/50 flex justify-between items-start gap-4">
+              <div>
+                <span class="text-xs text-sky-400 font-semibold block">${bem.tipo}</span>
+                <span class="text-sm text-slate-300">${bem.descricao}</span>
+              </div>
+              <span class="text-sm font-semibold text-emerald-400 whitespace-nowrap">${val}</span>
+            </div>
+          `);
+                    });
+                } else {
+                    container.append('<p class="text-sm text-slate-500 italic">Nenhum bem declarado.</p>');
+                }
+
+                $("#modal-bens").removeClass("hidden").addClass("flex");
+            }
+
+            function fecharModal(idModal) {
+                $(`#${idModal}`).removeClass("flex").addClass("hidden");
+            }
+
+            function togglePainelColunas() {
+                const painel = $("#painel-checkboxes");
+                const acoes = $("#acoes-colunas");
+                const icone = $("#icone-painel");
+
+                painel.toggleClass("hidden");
+                acoes.toggleClass("hidden");
+
+                // Rotaciona a seta indicando se está aberto ou fechado
+                icone.toggleClass("rotate-180");
+            }
+        </script>
+    </body>
+</html>
